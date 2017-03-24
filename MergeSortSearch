@@ -1,0 +1,129 @@
+//Gretchen Wilson
+//Reads data input 
+//Organizes input into two data arrays: Data and Query
+//Query holds the search items, Data holds the array to be searched
+//Performs a MergeSort on the Data array
+//Searches Data for Query items by a sequential and binary sort
+//Prints whether or not Query item was found and the time it took.
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class MergeSortSearch{
+	
+	//Method for merge sorting
+	public static ArrayList<Integer> mergeSort(ArrayList<Integer> array, int first, int last) {
+	
+		if (first<last){
+			int mid = Math.round((last+first)/ 2);
+			mergeSort(array, first, mid);
+			mergeSort(array, mid+1, last);
+			merge(array, first, mid, last);
+		}
+		return array;
+	}
+	public static ArrayList<Integer> merge(ArrayList<Integer> array, int first, int middle, int last){
+		//Set up let and right arrays
+		ArrayList<Integer> left= new ArrayList<Integer>(array.subList(first, middle+1));
+		ArrayList<Integer> right= new ArrayList<Integer>(array.subList(middle+1, last+1));
+		left.add(Integer.MAX_VALUE); right.add(Integer.MAX_VALUE);
+		
+		//Merge left and right arrays
+		int l=0;
+		int r=0;
+		for (int i=first; i<=last; i++){
+			if (left.get(l) < right.get(r))	array.set(i, left.get(l++));
+			else array.set(i, right.get(r++));
+			
+		}
+		return array;
+	}
+
+	//Method for binary searching
+	public static boolean binarySearch(int value, int start, int end, ArrayList<Integer> array ) {
+		
+		if ( start>end) return false;
+		
+		int midPoint = Math.round((start+end)/2);
+		int middle = array.get(midPoint);
+		
+		if (value == middle) return true;
+		if (value<middle) return binarySearch(value, start, midPoint-1, array );
+		if (value>middle) return binarySearch(value,midPoint+1, end, array );
+		else return false;
+	}
+	
+	//Method for sequential searching
+	public static boolean sequentialSearch(int value, ArrayList<Integer> array) {
+		boolean found = false;
+		for (int i=0; !found&&i<array.size(); i++){
+			if (value==array.get(i)) return true;
+		}
+		return found;
+	}
+
+	public static void main(String[] args) {
+		
+		//Variables
+		ArrayList<Integer> dataList = new ArrayList<Integer>();
+		ArrayList<Integer> queryList = new ArrayList<Integer>();
+		int query = 0;
+		int data = 0;
+		
+		try{
+			//Read File/Data Input
+			Scanner in = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
+			String [] sizes = in.nextLine().split(" ");
+			data = Integer.parseInt(sizes[0]);
+			query = Integer.parseInt(sizes[1]);
+			//Fill data array
+			for (int i=0; i<data; i++){
+				int input = in.nextInt();
+				dataList.add(input);
+			}
+			//Fill query array
+			
+			for (int e=0; e<query; e++) {
+				int input = in.nextInt();
+				queryList.add(input);
+				
+			}
+			in.close();
+		}
+		catch(Exception e){
+			System.out.println("Input Error: " + e.getMessage());
+			System.exit(0);
+		}
+		//Perform mergeSort on dataList
+		
+		long startMerge = System.currentTimeMillis();
+		dataList = mergeSort(dataList, 0, dataList.size()-1);
+		long endMerge = System.currentTimeMillis();
+		long mergeTime = endMerge - startMerge;
+		System.out.println("Prep Time: " + mergeTime + "ms");
+		//System.out.println(dataList.toString());
+		
+		
+		
+		//Search dataList for each query item in queryList
+		//Print results
+		for (int i=0; i<query; i++){
+			int value = queryList.get(i);
+			
+			long startBin = System.currentTimeMillis();
+			boolean binary = binarySearch(value, 0, dataList.size()-1, dataList);
+			long endBin = System.currentTimeMillis();
+			long timeBin = endBin - startBin;
+			
+			long startSeq = System.currentTimeMillis();
+			boolean sequential = sequentialSearch(value, dataList);
+			long endSeq = System.currentTimeMillis();
+			long timeSeq = endSeq - startSeq;
+			
+			System.out.println(sequential + ":" + timeSeq + "ms:" + binary + ":" + timeBin + "ms:" + value);
+		}
+	}
+	
+}
